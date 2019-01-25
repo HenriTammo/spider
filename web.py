@@ -1,7 +1,10 @@
 from builtins import print
 
 import requests
+import string
 from bs4 import BeautifulSoup
+
+
 
 
 def soupify(url):
@@ -22,13 +25,9 @@ def klick_spider(max_pages):
     prevItems = [None] * 100
     while page <= max_pages and breakPage == 0:
         j= 0
-        prices = []
         url = "https://www.klick.ee/catalogsearch/result/index/?p=" + str(page) + "&q=" + str(search)
         soup=soupify(url)
         print ("Leheküljel", page, "leiduvad asjad:")
-        prices = getPrice(url, prices)
-        #for price in prices.find_all:
-
         for link in (soup.find_all("h5", {"class": "product-name"})):
             for a in link.find_all('a'):
                 if a.get('href'):
@@ -40,33 +39,25 @@ def klick_spider(max_pages):
                     prevItems[j] = href
                     j += 1
                     title=a.string
-                    print(href)
-                    #titleFromPage(href)
-                    print(title)
-                    print (prices[j])
-                    #print ( 'href="%s">%s' % (href.encode('UTF8', 'replace'), title.encode('UTF8', 'replace')))
+                    print(title, ";", getPrice(href), ";", href)
+                    #print(href)
+                    #print(title)
+                    #print (getPrice(href))
             if breakPage == 1:
                 break
         print("\n\n")
         page += 1
 
 
-def getPrice(url, prices):
+def getPrice(url):
     price = soupify(url)
-    p = 0
-    for line in price.find_all("span", {"class": "price"}):
-        print (line)
-        p = line.string
-        p = p.strip("€")
-        p = p.strip(" ")
-        p = p.strip("\xa0")
-        p = p.replace(",", ".")
-        print (p)
-        #for letter in 'qwertyuiopasdfghjklzxcvbnm/':
-            #p = p.replace(letter, '')
-        #p.replace(u'\xa0', ' ').encode('utf-8')
-        p = float(p)
-        prices.append(p)
+    priceString = price.find("span", {"class": "price"})
+    priceString = priceString.get_text()
+    p = str(priceString)
+    p = p.replace("-", "00")
+    p = float(p)
+    return p
 
-search = input("Mida soovite otsida?")
+
+search = input("Mida soovite otsida? ")
 klick_spider(55)
